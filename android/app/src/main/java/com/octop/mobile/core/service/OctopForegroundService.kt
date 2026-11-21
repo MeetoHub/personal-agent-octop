@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import com.octop.mobile.core.system.BridgeManager
+import com.octop.mobile.core.system.PhoneLink
 
 /**
  * 常驻服务：让 agent 即使 App 退到后台也能被唤醒干活。
@@ -44,14 +45,14 @@ class OctopForegroundService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        // 服务活着 = 进程不被回收 = 手机桥还能被 NAS 调到
-        BridgeManager.start(this)
-        val where = BridgeManager.localUrl()
-        startForeground(NOTI_ID, buildNotification("手机能力在线 · $where"))
+        // 服务活着 = 进程不被回收 = 反向通道还能收到 NAS 的工具调用
+        PhoneLink.start(this)
+        startForeground(NOTI_ID, buildNotification(PhoneLink.statusText()))
         return START_STICKY
     }
 
     override fun onDestroy() {
+        PhoneLink.stop()
         BridgeManager.stop()
         super.onDestroy()
     }

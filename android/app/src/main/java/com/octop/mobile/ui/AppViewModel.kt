@@ -18,6 +18,7 @@ import com.octop.mobile.core.model.TaskStatus
 import com.octop.mobile.core.sync.LinkInfo
 import com.octop.mobile.core.sync.LinkState
 import com.octop.mobile.core.sync.SyncRepository
+import com.octop.mobile.core.system.PhoneLink
 import com.octop.mobile.core.tools.ToolRegistry
 import org.json.JSONArray
 import org.json.JSONObject
@@ -234,6 +235,8 @@ class AppViewModel : ViewModel() {
                     connectChat()
                     loadWorkspace()
                     refreshLink()
+                    // 有了 token 才能连反向通道（手机 → NAS）
+                    PhoneLink.restart()
                 }
                 .onFailure { e ->
                     _loginBusy.value = false
@@ -268,11 +271,13 @@ class AppViewModel : ViewModel() {
             connectChat()
             loadWorkspace()
             refreshLink()
+            PhoneLink.restart()
         }
     }
 
     fun logout() {
         closeChat()
+        PhoneLink.stop()
         TokenStore.clearToken()
         _chatMessages.value = emptyList()
         _auth.value = AuthState.LOGGED_OUT
