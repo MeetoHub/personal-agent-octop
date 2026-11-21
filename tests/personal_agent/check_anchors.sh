@@ -24,6 +24,10 @@ check "$M" 'build_phone_tools'                                   "manager.py 构
 check "$M" 'merged_tools\.extend\(phone_tools\)'                 "manager.py 合并 phone_tools"
 check "$M" '\*phone_tools'                                       "manager.py reserved 含 phone_tools"
 
+check "$M" 'build_ticket_tools'                                  "manager.py 构建 ticket_tools"
+check "$M" 'merged_tools\.extend\(ticket_tools\)'                "manager.py 合并 ticket_tools"
+check "$M" '\*ticket_tools'                                      "manager.py reserved 含 ticket_tools"
+
 check "$E" 'TICKET_NOT_FOUND'                                    "errors.py 含 TICKET_NOT_FOUND"
 
 [ "$fail" -eq 0 ] && echo "锚点齐全。" || { echo "锚点缺失，合并上游时被覆盖了。" >&2; exit 1; }
