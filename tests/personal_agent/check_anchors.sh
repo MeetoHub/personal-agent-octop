@@ -28,6 +28,11 @@ check "$M" 'build_ticket_tools'                                  "manager.py 构
 check "$M" 'merged_tools\.extend\(ticket_tools\)'                "manager.py 合并 ticket_tools"
 check "$M" '\*ticket_tools'                                      "manager.py reserved 含 ticket_tools"
 
+# 部署用的是 b6 基线副本，它必须和仓库那份保持同样的补丁
+B=deploy/nas/baseline-b6/manager.py
+check "$B" 'build_ticket_tools'                                  "baseline-b6 含 ticket_tools"
+check "$B" 'merged_tools\.extend\(ticket_tools\)'                "baseline-b6 合并 ticket_tools"
+
 check "$E" 'TICKET_NOT_FOUND'                                    "errors.py 含 TICKET_NOT_FOUND"
 
 [ "$fail" -eq 0 ] && echo "锚点齐全。" || { echo "锚点缺失，合并上游时被覆盖了。" >&2; exit 1; }

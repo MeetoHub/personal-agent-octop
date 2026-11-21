@@ -4489,6 +4489,18 @@ class AgentManager:
 
             phone_tools = build_phone_tools(self._config, user_repo=self._repos.user_repo)
 
+        # 工单工具：建单 / 看单 / 报进度。Router 预设的白名单里就有它们。
+        ticket_tools: list[Any] = []
+        if not team_host:
+            from octop.infra.tickets.store import TicketStore  # noqa: PLC0415
+            from octop.infra.tickets.tools import build_ticket_tools  # noqa: PLC0415
+
+            ticket_tools = build_ticket_tools(
+                self._config,
+                store=TicketStore(self._repos.db),
+                agent_id=row.agent_id,
+            )
+
         from octop_harness.plugins import PluginRegistry, build_plugin_tools  # noqa: PLC0415
 
         from octop.infra.agents.plugins.plugin_tool_defaults import (  # noqa: PLC0415
@@ -4533,7 +4545,13 @@ class AgentManager:
             plugin_tools,
             reserved={
                 str(getattr(t, "name", ""))
-                for t in [*(cron_tools or []), *knowledge_tools, *mobile_tools, *phone_tools]
+                for t in [
+                    *(cron_tools or []),
+                    *knowledge_tools,
+                    *mobile_tools,
+                    *phone_tools,
+                    *ticket_tools,
+                ]
             },
         )
         self._plugin_tool_labels[row.agent_id] = {
@@ -4598,6 +4616,7 @@ class AgentManager:
         merged_tools.extend(knowledge_tools)
         merged_tools.extend(mobile_tools)
         merged_tools.extend(phone_tools)
+        merged_tools.extend(ticket_tools)
         merged_tools.extend(plugin_tools)
         # agent_list / ask_agent: PeerAgentMiddleware (team_enabled=True), not config.tools.
 

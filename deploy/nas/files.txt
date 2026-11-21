@@ -12,6 +12,7 @@ infra/agents/manager.py|700|deploy/nas/baseline-b6/manager.py
 infra/tickets/__init__.py|644
 infra/tickets/stage.py|644
 infra/tickets/store.py|644
+infra/tickets/tools.py|644
 infra/phone/__init__.py|644
 infra/phone/hub.py|644
 infra/phone/protocol.py|644
