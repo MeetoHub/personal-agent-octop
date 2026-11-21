@@ -143,6 +143,13 @@ ignore = ["E501"]
 "tests/**" = ["B011"]
 "src/octop/api/**" = ["B008"]
 
+[tool.ruff.format]
+# 这两张表（动词表 / 字段表）刻意排成多列便于人读；格式化会拆成一行一个，保持原样。
+exclude = [
+    "src/octop/infra/tickets/stage.py",
+    "src/octop/infra/tickets/store.py",
+]
+
 [tool.mypy]
 python_version = "3.12"
 strict = true

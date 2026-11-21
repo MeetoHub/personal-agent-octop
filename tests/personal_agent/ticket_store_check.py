@@ -1,3 +1,5 @@
+# ruff: noqa
+# fmt: off
 """P2 验收脚本 — 在 DB 副本上跑通 TicketStore 全链路。
 
 不改生产库：DATABASE = /tmp/trial.db

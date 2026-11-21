@@ -16,7 +16,7 @@ difference would let a caller probe for the existence of other people's tickets.
 
 from __future__ import annotations
 
-from typing import Any, cast
+from typing import Any
 
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, ConfigDict, Field

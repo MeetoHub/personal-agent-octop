@@ -1,3 +1,5 @@
+# ruff: noqa
+# fmt: off
 import sys, types, importlib.util
 
 # stage.py 无外部依赖，直接加载
@@ -85,4 +87,3 @@ print()
 print(f"{'='*50}")
 print(f"结果: {'全部通过' if fail==0 else f'{fail} 项失败'}")
 sys.exit(1 if fail else 0)
-

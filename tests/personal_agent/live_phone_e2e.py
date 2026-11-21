@@ -57,7 +57,9 @@ async def main() -> int:
             check("7 tools advertised", len(hello.get("tools") or []) == 7)
 
             await ws.send(
-                json.dumps({"type": "hello", "device": {"model": "e2e"}, "capabilities": ["contacts"]})
+                json.dumps(
+                    {"type": "hello", "device": {"model": "e2e"}, "capabilities": ["contacts"]}
+                )
             )
             await ws.send(json.dumps({"type": "ping"}))
             reply = json.loads(await asyncio.wait_for(ws.recv(), 5))

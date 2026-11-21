@@ -383,7 +383,7 @@ class TicketStore:
         ]
         sets_parts: list[str] = []
         params: list[Any] = []
-        for name, fragment, value in pairs:
+        for _name, fragment, value in pairs:
             if value is None:
                 continue
             sets_parts.append(fragment)

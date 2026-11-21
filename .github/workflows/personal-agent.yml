@@ -44,11 +44,13 @@ jobs:
         run: bash tests/personal_agent/check_anchors.sh
 
       - name: 工单七态状态机
-        run: python tests/personal_agent/test_stage_states.py
+        run: python tests/personal_agent/stage_states_check.py
 
       - name: 无 CRLF
         run: |
-          bad=$(grep -rl $'\r' src/octop/infra/phone src/octop/infra/tickets \
+          # 只看源码；上面的 compileall 会生成 __pycache__，别把 .pyc 算进来
+          bad=$(grep -rl --include='*.py' --exclude-dir=__pycache__ $'\r' \
+                  src/octop/infra/phone src/octop/infra/tickets \
                   src/octop/api/routers/phone.py src/octop/api/routers/tickets.py || true)
           if [ -n "$bad" ]; then
             echo "以下文件含 CR，NAS 上会报 SyntaxError / bad interpreter："
