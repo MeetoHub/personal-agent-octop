@@ -46,6 +46,9 @@ jobs:
       - name: 工单七态状态机
         run: python tests/personal_agent/stage_states_check.py
 
+      - name: Router 预设逻辑
+        run: python tests/personal_agent/router_preset_check.py
+
       - name: 无 CRLF
         run: |
           # 只看源码；上面的 compileall 会生成 __pycache__，别把 .pyc 算进来
