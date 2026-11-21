@@ -4542,6 +4542,13 @@ class AgentManager:
                 workspace_for=_mobile_workspace_for,
             )
 
+        # Reverse-channel phone tools (the app dials in); read-only batch.
+        phone_tools: list[Any] = []
+        if not team_host and self._config.capabilities.mobile.enabled:
+            from octop.infra.phone.tools import build_phone_tools  # noqa: PLC0415
+
+            phone_tools = build_phone_tools(self._config, user_repo=self._repos.user_repo)
+
         from octop_harness.plugins import PluginRegistry, build_plugin_tools  # noqa: PLC0415
 
         from octop.infra.agents.plugins.plugin_tool_defaults import (  # noqa: PLC0415
@@ -4586,7 +4593,7 @@ class AgentManager:
             plugin_tools,
             reserved={
                 str(getattr(t, "name", ""))
-                for t in [*(cron_tools or []), *knowledge_tools, *mobile_tools]
+                for t in [*(cron_tools or []), *knowledge_tools, *mobile_tools, *phone_tools]
             },
         )
         self._plugin_tool_labels[row.agent_id] = {
@@ -4650,6 +4657,7 @@ class AgentManager:
             merged_tools.extend(cron_tools)
         merged_tools.extend(knowledge_tools)
         merged_tools.extend(mobile_tools)
+        merged_tools.extend(phone_tools)
         merged_tools.extend(plugin_tools)
         # agent_list / ask_agent: PeerAgentMiddleware (team_enabled=True), not config.tools.
 
