@@ -1,3 +1,21 @@
+> ## 📌 本 Fork 说明（个人智能体版）
+>
+> 本仓库是 [TencentCloud/Octop](https://github.com/TencentCloud/Octop) 的 fork，主体是 Octop 完整源码，在上面叠加个人智能体改造。上游最新代码可直接合并：
+>
+> ```bash
+> git fetch upstream
+> git merge upstream/main
+> ```
+>
+> **我们的增量改动**（均在 `main` 历史中，详见 `git log`）：
+> - **后端**：工单系统 `src/octop/infra/tickets/` + `api/routers/tickets.py` + 026 迁移；手机反向通道 `src/octop/infra/phone/` + `api/routers/phone.py`（7 个只读工具）；`app.py`/`errors.py`/`manager.py` 的挂载与注册。
+> - **手机端**：`android/` — 原生 Kotlin/Compose App（非 WebView），复用 Octop UI 设计令牌。
+> - **方案文档**：`docs/personal-agent/`（已脱敏）。
+>
+> 基线：上游 commit `30f4aec`（v1.0.3b7）。上游代码版权归腾讯，许可 MIT；增量改动同遵 MIT。
+
+---
+
 <p align="center">
   <img src="docs/assets/readme-banner.png" alt="Octop Banner" width="600" />
 </p>

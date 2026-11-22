@@ -415,6 +415,11 @@ export const AgentCard = memo(function AgentCard({
 
         {/* Description */}
         <p className={styles.agentCard2Desc}>{agent.description || "\u00a0"}</p>
+        {(agent.config as Record<string, unknown> | undefined)?.created_by_agent_id ? (
+          <p className={styles.agentCard2Desc}>
+            {t("experts.createdByRoot", "主智能体创建")}
+          </p>
+        ) : null}
 
         {/* Error */}
         {localState === "failed" && friendlyError && (

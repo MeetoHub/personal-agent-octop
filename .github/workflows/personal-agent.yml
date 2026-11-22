@@ -1,0 +1,62 @@
+name: personal-agent
+
+# 只覆盖我们自己加的东西：补丁语法、锚点、状态机测试、LF。
+# 上游的 ci.yml 仍然负责全仓 lint/typecheck/test（只在 PR 上跑）。
+
+on:
+  pull_request:
+    paths:
+      - "src/octop/**"
+      - "tests/personal_agent/**"
+      - "deploy/nas/**"
+  push:
+    branches: [main]
+    paths:
+      - "src/octop/**"
+      - "tests/personal_agent/**"
+      - "deploy/nas/**"
+
+permissions:
+  contents: read
+
+jobs:
+  patch-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 语法检查（补丁模块）
+        run: |
+          python -m compileall -q \
+            src/octop/infra/tickets \
+            src/octop/infra/phone \
+            src/octop/api/routers/tickets.py \
+            src/octop/api/routers/phone.py \
+            src/octop/api/app.py \
+            src/octop/infra/errors.py \
+            src/octop/infra/agents/manager.py
+
+      - name: 补丁锚点
+        run: bash tests/personal_agent/check_anchors.sh
+
+      - name: 工单七态状态机
+        run: python tests/personal_agent/stage_states_check.py
+
+      - name: Router 预设逻辑
+        run: python tests/personal_agent/router_preset_check.py
+
+      - name: 无 CRLF
+        run: |
+          # 只看源码；上面的 compileall 会生成 __pycache__，别把 .pyc 算进来
+          bad=$(grep -rl --include='*.py' --exclude-dir=__pycache__ $'\r' \
+                  src/octop/infra/phone src/octop/infra/tickets \
+                  src/octop/api/routers/phone.py src/octop/api/routers/tickets.py || true)
+          if [ -n "$bad" ]; then
+            echo "以下文件含 CR，NAS 上会报 SyntaxError / bad interpreter："
+            echo "$bad"
+            exit 1
+          fi

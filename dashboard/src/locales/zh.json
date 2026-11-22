@@ -285,6 +285,7 @@
     "control": "控制",
     "experts": "专家",
     "tasks": "自动化",
+    "tickets": "活",
     "connectors": "连接器",
     "bridge": "云端协同",
     "acp": "智能体协作",
@@ -360,7 +361,8 @@
     "saveFailed": "没能保存导航布局",
     "dragToReorder": "拖动排序",
     "chatHistory": "会话列表",
-    "passkeys": "通行密钥"
+    "passkeys": "通行密钥",
+    "relations": "关系"
   },
   "skillPackages": {
     "title": "技能包",
@@ -576,7 +578,7 @@
     "editDocumentSuccess": "已保存，正在重建索引",
     "editDocumentFailed": "保存文档失败",
     "filenameRequired": "请输入文件名",
-    "filenamePlaceholder": "例如 notes",
+    "filenamePlaceholder": "文件名",
     "fileFormat": "格式",
     "fileContent": "内容",
     "fileContentPlaceholder": "在此编写文档内容…",
@@ -597,7 +599,6 @@
     "moveSuccess": "已移动",
     "moveSuccessTo": "已移动到「{{name}}」",
     "moveFailed": "移动失败",
-    "filenamePlaceholder": "文件名",
     "pathBreadcrumb": "路径导航",
     "deleteFolderConfirm": "删除此文件夹及其内部文档？",
     "uploaded": "文档已上传",
@@ -1368,7 +1369,8 @@
       "yolo": "YOLO",
       "yoloHint": "新会话默认不审批。底层智能体会直接执行，包括改文件和运行命令。对话里仍可改回每次审批。",
       "sessionModeHint": "按当前托管智能体提供的模式。新对话默认用这里的选择，单个对话里还可以改。"
-    }
+    },
+    "createdByRoot": "主智能体创建"
   },
   "subagents": {
     "catalogTitle": "子智能体管理",
@@ -8162,5 +8164,31 @@
     "nameRequired": "请先填写名称",
     "failed": "润色失败，请稍后重试",
     "emptyResult": "模型未返回结果"
+  },
+  "tickets": {
+    "subtitle": "长任务都在这里：谁在做、卡在哪、下一步是什么",
+    "refresh": "刷新",
+    "loadFailed": "工单加载失败",
+    "empty": "还没有活。在对话里让它做一件长任务，就会出现在这里。",
+    "filterAll": "全部",
+    "filterPerson": "等我处理",
+    "filterWorking": "进行中",
+    "latestReport": "最近进度",
+    "stage": {
+      "working/queued": "排队中",
+      "working": "进行中",
+      "idle": "空闲",
+      "person/answer": "等你回答",
+      "person/review": "等你验收",
+      "person/blocked": "卡住了",
+      "person/delivery": "投递失败"
+    }
+  },
+  "relations": {
+    "subtitle": "管家记得的人：谁是谁、什么关系",
+    "refresh": "刷新",
+    "loadFailed": "关系簿加载失败",
+    "empty": "还没有记录。在对话里提到「张总是我老板」这类信息，它就会记下来。",
+    "searchPlaceholder": "按人名或关系搜索"
   }
 }

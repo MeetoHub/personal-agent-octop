@@ -1,0 +1,36 @@
+# 需要部署到 NAS 的补丁文件（相对 src/octop/）
+# 格式：路径|权限位|本地来源（可选，默认 src/octop/<路径>）
+#
+# manager.py 例外：生产是 v1.0.3b6，仓库是 b7，两个版本的上游内容不同。
+# 这里指向 baseline-b6/ 里那份「b6 + P6 补丁」的产物（SHA 46ce4c43…，与生产一致）。
+# NAS 升级到 b7 之后，删掉第三列，直接部署 src/octop/infra/agents/manager.py。
+config.py|644
+infra/users/permissions.py|644
+api/app.py|700
+api/routers/agents.py|644
+api/routers/tickets.py|644
+api/routers/phone.py|644
+api/routers/relations.py|644
+api/routers/chat/turn.py|644|deploy/nas/baseline-b6/turn.py
+infra/errors.py|700
+infra/agents/manager.py|700|deploy/nas/baseline-b6/manager.py
+infra/agents/agent_admin.py|644
+infra/agents/router_agent.py|644
+infra/agents/agent_subagents.py|644
+infra/relations/__init__.py|644
+infra/relations/store.py|644
+infra/relations/tools.py|644
+infra/agents/presets/__init__.py|644
+infra/agents/presets/router.py|644
+infra/tickets/__init__.py|644
+infra/tickets/stage.py|644
+infra/tickets/store.py|644
+infra/tickets/tools.py|644
+infra/tickets/auto_open.py|644
+infra/phone/__init__.py|644
+infra/phone/hub.py|644
+infra/phone/protocol.py|644
+infra/phone/tools.py|644
+infra/db/migrations/026_tickets.sql|644
+infra/db/migrations/026_tickets.pg.sql|644
+infra/db/migrations/027_relations.sql|644

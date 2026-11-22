@@ -143,3 +143,8 @@ export interface BackgroundUsageResponse {
   total_tokens: number;
   total_calls: number;
 }
+
+/** 打开对话时的默认入口：平台内建的调度层（隐形，不在专家列表里）。 */
+export function getHomeAgent() {
+  return request<Record<string, unknown>>("/agents/home");
+}

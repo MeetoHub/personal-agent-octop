@@ -62,6 +62,10 @@ import type { TeamRecord } from "../../api/modules/teams";
 import { TeamCard } from "./components/TeamCard";
 import AgentExpertsTable from "./components/AgentExpertsTable";
 import ExpertMarketTab from "./components/ExpertMarketTab";
+import {
+  ALLOW_MANUAL_AGENT_CREATION,
+  SHOW_EXPERT_MARKET,
+} from "../../productMode";
 import { OctopEmptyMascot } from "../../components/EmptyState";
 import { isOwnedExpert, ownedExperts } from "../../utils/sharedExpert";
 import {
@@ -553,41 +557,45 @@ export default function ExpertsPage() {
               ]}
             />
             {refreshButton}
-            {canAddCloudExpert ? (
-              <Tooltip title={t("experts.addCloudExpertHint")}>
-                <button
-                  className={styles.toolbarBtn}
-                  type="button"
-                  onClick={openCloudCollab}
-                >
-                  <Cloudy size={14} />
-                  {t("experts.addCloudExpert")}
-                </button>
-              </Tooltip>
+            {ALLOW_MANUAL_AGENT_CREATION ? (
+              <>
+              {canAddCloudExpert ? (
+                <Tooltip title={t("experts.addCloudExpertHint")}>
+                  <button
+                    className={styles.toolbarBtn}
+                    type="button"
+                    onClick={openCloudCollab}
+                  >
+                    <Cloudy size={14} />
+                    {t("experts.addCloudExpert")}
+                  </button>
+                </Tooltip>
+              ) : null}
+              <button
+                className={styles.toolbarBtn}
+                type="button"
+                onClick={() => setManagedOpen(true)}
+              >
+                <Cable size={14} />
+                <span className={styles.titleWithBeta}>
+                  {t("experts.managed.createTitle")}
+                  <BetaBadge />
+                </span>
+              </button>
+              <button
+                className={styles.toolbarBtnPrimary}
+                type="button"
+                disabled={defaultCreating}
+                onClick={() => void openDefaultCreate()}
+              >
+                <Plus size={14} />
+                {t("experts.newExpert")}
+              </button>
+              <button className={styles.toolbarBtn} onClick={openExpertMarket}>
+                {t("experts.addFromMarket")}
+              </button>
+              </>
             ) : null}
-            <button
-              className={styles.toolbarBtn}
-              type="button"
-              onClick={() => setManagedOpen(true)}
-            >
-              <Cable size={14} />
-              <span className={styles.titleWithBeta}>
-                {t("experts.managed.createTitle")}
-                <BetaBadge />
-              </span>
-            </button>
-            <button
-              className={styles.toolbarBtnPrimary}
-              type="button"
-              disabled={defaultCreating}
-              onClick={() => void openDefaultCreate()}
-            >
-              <Plus size={14} />
-              {t("experts.newExpert")}
-            </button>
-            <button className={styles.toolbarBtn} onClick={openExpertMarket}>
-              {t("experts.addFromMarket")}
-            </button>
           </div>
         </div>
         {visibleExpertAgents.length === 0 ? (
@@ -825,13 +833,17 @@ export default function ExpertsPage() {
             label: <TabLabel icon={Users}>{t("experts.myTeams")}</TabLabel>,
             children: teamsContent,
           },
-          {
-            key: "market",
-            label: (
-              <TabLabel icon={Store}>{t("experts.expertMarket")}</TabLabel>
-            ),
-            children: marketContent,
-          },
+          ...(SHOW_EXPERT_MARKET
+            ? [
+                {
+                  key: "market",
+                  label: (
+                    <TabLabel icon={Store}>{t("experts.expertMarket")}</TabLabel>
+                  ),
+                  children: marketContent,
+                },
+              ]
+            : []),
         ]}
       />
 

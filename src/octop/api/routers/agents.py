@@ -212,6 +212,8 @@ def _row_dict(
         "agent_id": row.agent_id,
         "user_id": row.user_id,
         "name": row.name,
+        # 主智能体标记：前端据此把 /chat 直接导到它，不再先让用户选人
+        "is_primary": bool(cfg.get("is_primary")),
         "description": row.description,
         "persona_mbti": row.persona_mbti,
         "default_model": row.default_model,
@@ -263,6 +265,15 @@ def _row_dict(
     return payload
 
 
+def _is_hidden_agent(row: Any) -> bool:
+    """系统内建 agent（调度层）不进列表：用户不该看到、也不该配置它。"""
+    try:
+        cfg = json.loads(getattr(row, "config_json", "") or "{}")
+    except (TypeError, ValueError):
+        return False
+    return isinstance(cfg, dict) and bool(cfg.get("hidden"))
+
+
 @router.get("", summary="List agents")
 async def list_agents(
     user: Any = Depends(current_user),
@@ -294,6 +305,7 @@ async def list_agents(
     registry = server.app_runtime.agent_registry
     if scope == "all":
         rows = registry.list_rows()
+        rows = [r for r in rows if not _is_hidden_agent(r)]
         user_ids = {r.user_id for r in rows if r.user_id is not None}
         username_by_id: dict[int, str] = {}
         for uid in user_ids:
@@ -318,6 +330,7 @@ async def list_agents(
         viewer_user_id=None if user.is_admin else user.id,
     )
     rows = list({row.agent_id: row for row in [*shared, *owned]}.values())
+    rows = [r for r in rows if not _is_hidden_agent(r)]
     shared_owner_username_by_id: dict[int, str] = {}
     for row in shared:
         if row.user_id is None or row.user_id in shared_owner_username_by_id:
@@ -427,6 +440,36 @@ async def mark_agent_read(
         raise OctopError(ErrorCode.AGENT_NOT_FOUND, f"agent {agent_id!r} not found")
     assert_agent_access_row(row, user, repos=server.services.repos)
     server.services.session_repo.clear_unread_for_agent(agent_id, user.id)
+
+
+@router.get("/home", summary="Home entry agent")
+async def home_agent(
+    user: Any = Depends(current_user),
+    server: Any = Depends(get_server),
+) -> dict[str, Any]:
+    """用户打开对话时的默认入口。
+
+    入口是**有记忆的根 agent（管家）**，不是内部调度层：人格和判断必须长在同一个
+    实体上，用户才会觉得"一直是同一个人在懂我"。`is_system_router` 那套留作以后
+    需要极速分类器时再用，不占入口。
+    """
+    from octop.infra.agents.router_agent import (  # noqa: PLC0415
+        ensure_router_agent,
+        find_home_agent,
+    )
+
+    assert server.app_runtime is not None
+    registry = server.app_runtime.agent_registry
+    row = find_home_agent(server.services.repos.agent_repo, user.id)
+    if row is None:
+        # 全新用户：先给一个可见的根 agent，而不是隐藏的调度层
+        row = await ensure_router_agent(registry, user.id)
+    return _row_dict(
+        row,
+        viewer_user_id=user.id,
+        owner_username=user.username,
+        server=server,
+    )
 
 
 @router.get("/{agent_id}", summary="Get agent")
