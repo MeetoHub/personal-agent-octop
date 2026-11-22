@@ -45,6 +45,23 @@ def _cfg(row: Any) -> dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
+def find_home_agent(repo: Any, user_id: int) -> Any | None:
+    """用户打开对话时应该进的那个 agent：有 is_root 的就用它，否则第一个可见的。
+
+    这里刻意**不**返回 `hidden` 的系统 agent——调度层是内部件，不是入口。
+    """
+    try:
+        rows = repo.list_by_user(int(user_id))
+    except Exception:  # noqa: BLE001
+        return None
+    visible = [row for row in rows if not _cfg(row).get("hidden")]
+    for row in visible:
+        cfg = _cfg(row)
+        if cfg.get("is_root") or cfg.get("is_primary"):
+            return row
+    return visible[0] if visible else None
+
+
 def find_router_agent(repo: Any, user_id: int) -> Any | None:
     """在用户名下找调度层。按 config 标记找，不依赖固定 id。"""
     try:

@@ -440,16 +440,28 @@ async def mark_agent_read(
     server.services.session_repo.clear_unread_for_agent(agent_id, user.id)
 
 
-@router.get("/home", summary="Home entry (system router)")
+@router.get("/home", summary="Home entry agent")
 async def home_agent(
     user: Any = Depends(current_user),
     server: Any = Depends(get_server),
 ) -> dict[str, Any]:
-    """用户打开对话时的默认入口：平台内建的调度层，不是用户配置的专家。"""
-    from octop.infra.agents.router_agent import ensure_router_agent  # noqa: PLC0415
+    """用户打开对话时的默认入口。
+
+    入口是**有记忆的根 agent（管家）**，不是内部调度层：人格和判断必须长在同一个
+    实体上，用户才会觉得"一直是同一个人在懂我"。`is_system_router` 那套留作以后
+    需要极速分类器时再用，不占入口。
+    """
+    from octop.infra.agents.router_agent import (  # noqa: PLC0415
+        ensure_router_agent,
+        find_home_agent,
+    )
 
     assert server.app_runtime is not None
-    row = await ensure_router_agent(server.app_runtime.agent_registry, user.id)
+    registry = server.app_runtime.agent_registry
+    row = find_home_agent(server.services.repos.agent_repo, user.id)
+    if row is None:
+        # 全新用户：先给一个可见的根 agent，而不是隐藏的调度层
+        row = await ensure_router_agent(registry, user.id)
     return _row_dict(
         row,
         viewer_user_id=user.id,

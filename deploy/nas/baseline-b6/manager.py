@@ -4507,6 +4507,7 @@ class AgentManager:
         admin_tools: list[Any] = []
         if (
             is_team_agent(row)
+            or bool(cfg.get("is_root"))
             or bool(cfg.get("is_primary"))
             or bool(cfg.get("is_system_router"))
         ):

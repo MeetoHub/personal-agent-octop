@@ -573,7 +573,7 @@
     "editDocumentSuccess": "Saved; reindex started",
     "editDocumentFailed": "Failed to save document",
     "filenameRequired": "Please enter a file name",
-    "filenamePlaceholder": "e.g. notes",
+    "filenamePlaceholder": "File name",
     "fileFormat": "Format",
     "fileContent": "Content",
     "fileContentPlaceholder": "Write document content here…",
@@ -594,7 +594,6 @@
     "moveSuccess": "Moved",
     "moveSuccessTo": "Moved to “{{name}}”",
     "moveFailed": "Failed to move",
-    "filenamePlaceholder": "File name",
     "pathBreadcrumb": "Path",
     "deleteFolderConfirm": "Delete this folder and everything inside it?",
     "uploaded": "Documents uploaded",
@@ -1364,7 +1363,8 @@
       "yolo": "YOLO",
       "yoloHint": "New chats skip approval. The underlying agent runs actions directly, including file edits and commands. A chat can still switch back to asking every time.",
       "sessionModeHint": "Modes come from the managed agent. New chats start here, and a chat can still switch."
-    }
+    },
+    "createdByRoot": "Created by the root agent"
   },
   "subagents": {
     "catalogTitle": "Manage subagents",
