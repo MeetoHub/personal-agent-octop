@@ -33,6 +33,9 @@ B=deploy/nas/baseline-b6/manager.py
 check "$B" 'build_ticket_tools'                                  "baseline-b6 含 ticket_tools"
 check "$B" 'merged_tools\.extend\(ticket_tools\)'                "baseline-b6 合并 ticket_tools"
 
+check "$M" 'build_agent_admin_tools'                             "manager.py 招人工具"
+check "$B" 'build_agent_admin_tools'                             "baseline-b6 招人工具"
+
 # 规则层：长任务自动建单（仓库 + b6 基线都要有）
 T=src/octop/api/routers/chat/turn.py
 BT=deploy/nas/baseline-b6/turn.py

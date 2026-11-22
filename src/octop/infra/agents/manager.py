@@ -4561,6 +4561,21 @@ class AgentManager:
                 agent_id=row.agent_id,
             )
 
+        # 超级智能体：只有团队主持或主智能体（config.is_primary）能"招人"
+        from octop.infra.agents.teams import is_team_agent  # noqa: PLC0415
+
+        admin_tools: list[Any] = []
+        if is_team_agent(row) or bool(cfg.get("is_primary")):
+            from octop.infra.agents.agent_admin import (  # noqa: PLC0415
+                build_agent_admin_tools,
+            )
+
+            admin_tools = build_agent_admin_tools(
+                create_agent=self.create,
+                count_agents=lambda uid: self._repos.agent_repo.count_by_user(uid),
+                caller_agent_id=row.agent_id,
+            )
+
         from octop_harness.plugins import PluginRegistry, build_plugin_tools  # noqa: PLC0415
 
         from octop.infra.agents.plugins.plugin_tool_defaults import (  # noqa: PLC0415
@@ -4611,6 +4626,7 @@ class AgentManager:
                     *mobile_tools,
                     *phone_tools,
                     *ticket_tools,
+                    *admin_tools,
                 ]
             },
         )
@@ -4677,6 +4693,7 @@ class AgentManager:
         merged_tools.extend(mobile_tools)
         merged_tools.extend(phone_tools)
         merged_tools.extend(ticket_tools)
+        merged_tools.extend(admin_tools)
         merged_tools.extend(plugin_tools)
         # agent_list / ask_agent: PeerAgentMiddleware (team_enabled=True), not config.tools.
 
