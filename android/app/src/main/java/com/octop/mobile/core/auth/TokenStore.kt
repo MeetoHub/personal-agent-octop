@@ -56,7 +56,7 @@ object TokenStore {
     fun save(token: String, endpoint: String, username: String = "") {
         prefs?.edit()
             ?.putString(K_TOKEN, token)
-            ?.putString(K_ENDPOINT, endpoint)
+            ?.putString(K_ENDPOINT, com.octop.mobile.core.sync.Endpoints.normalize(endpoint))
             ?.putString(K_USERNAME, username)
             ?.apply()
     }

@@ -39,7 +39,7 @@ class OctopClient(
     }
 
     fun updateEndpoint(url: String, token: String) {
-        this.baseUrl = url.trimEnd('/')
+        this.baseUrl = Endpoints.normalize(url)
         this.token = token
     }
 
