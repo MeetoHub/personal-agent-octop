@@ -55,7 +55,8 @@ bad=0
 for i in "${!PATHS[@]}"; do
   f="$(local_file "$i")"
   if [ ! -f "$f" ]; then echo "缺失：$f" >&2; bad=1; continue; fi
-  if grep -q $'\r' "$f"; then echo "CRLF：${PATHS[$i]}（$f，先转 LF）" >&2; bad=1; fi
+  # -U 关掉 MSYS 的文本模式，否则 grep 会把 CR 吃掉、漏报 CRLF
+  if grep -qU $'\r' "$f"; then echo "CRLF：${PATHS[$i]}（$f，先转 LF）" >&2; bad=1; fi
 done
 [ "$bad" -eq 0 ] || { echo "本地检查未通过，终止。" >&2; exit 1; }
 

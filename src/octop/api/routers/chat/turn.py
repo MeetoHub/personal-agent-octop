@@ -304,6 +304,18 @@ async def prepare_dashboard_turn(
         thread_id=turn.thread_id,
         session_key=turn.session_key,
     )
+    # 规则层：明显是长任务的，先落一张工单，用户在「活」页能立刻看到。
+    # 放在这里是因为 thread_id 刚解析出来；建单失败不影响对话（内部已吞异常）。
+    from octop.infra.tickets.auto_open import open_ticket_for_turn  # noqa: PLC0415
+    from octop.infra.tickets.store import TicketStore  # noqa: PLC0415
+
+    open_ticket_for_turn(
+        TicketStore(server.services.db),
+        owner_user_id=int(user.id),
+        agent_id=agent_id,
+        thread_id=thread_id,
+        text=_turn_plain_text(turn),
+    )
     model_ref = (turn.default_model or "").strip() or None
     if (
         model_ref is not None

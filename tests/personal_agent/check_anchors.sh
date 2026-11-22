@@ -33,6 +33,12 @@ B=deploy/nas/baseline-b6/manager.py
 check "$B" 'build_ticket_tools'                                  "baseline-b6 含 ticket_tools"
 check "$B" 'merged_tools\.extend\(ticket_tools\)'                "baseline-b6 合并 ticket_tools"
 
+# 规则层：长任务自动建单（仓库 + b6 基线都要有）
+T=src/octop/api/routers/chat/turn.py
+BT=deploy/nas/baseline-b6/turn.py
+check "$T" 'open_ticket_for_turn'                                "turn.py 自动建单 hook"
+check "$BT" 'open_ticket_for_turn'                               "baseline-b6 turn.py 自动建单 hook"
+
 check "$E" 'TICKET_NOT_FOUND'                                    "errors.py 含 TICKET_NOT_FOUND"
 
 [ "$fail" -eq 0 ] && echo "锚点齐全。" || { echo "锚点缺失，合并上游时被覆盖了。" >&2; exit 1; }
