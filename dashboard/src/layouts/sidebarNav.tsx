@@ -19,6 +19,7 @@ import {
   GraduationCap,
   Shield,
   PanelsTopLeft,
+  ListChecks,
 } from "lucide-react";
 import type { OctopUser } from "../api/modules/auth";
 import { navAllowed, userCan } from "../utils/permissions";
@@ -159,6 +160,13 @@ export function buildNavSections(
       labelKey: "nav.chat",
     },
   ];
+  // 活：每个人只看自己的工单，不做权限门（和对话同级）
+  topItems.push({
+    key: "tickets",
+    path: "/tickets",
+    icon: <ListChecks size={iconSize} strokeWidth={iconStroke} />,
+    labelKey: "nav.tickets",
+  });
   if (navAllowed(user, "experts")) {
     topItems.push({
       key: "experts",

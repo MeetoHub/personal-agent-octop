@@ -281,6 +281,7 @@
     "control": "Control",
     "experts": "Experts",
     "tasks": "Automation",
+    "tickets": "Work",
     "connectors": "Connectors",
     "bridge": "Cloud collab",
     "acp": "Agent collaboration",
@@ -8028,5 +8029,24 @@
     "nameRequired": "Enter a name first",
     "failed": "Polish failed. Please try again later.",
     "emptyResult": "The model returned an empty result"
+  },
+  "tickets": {
+    "subtitle": "Long-running work in one place: who is on it, what is blocking it, what happens next",
+    "refresh": "Refresh",
+    "loadFailed": "Failed to load tickets",
+    "empty": "No work yet. Ask the assistant for a long-running task and it will show up here.",
+    "filterAll": "All",
+    "filterPerson": "Waiting on me",
+    "filterWorking": "In progress",
+    "latestReport": "Latest update",
+    "stage": {
+      "working/queued": "Queued",
+      "working": "In progress",
+      "idle": "Idle",
+      "person/answer": "Awaiting answer",
+      "person/review": "Awaiting review",
+      "person/blocked": "Blocked",
+      "person/delivery": "Delivery failed"
+    }
   }
 }

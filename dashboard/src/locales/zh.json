@@ -281,6 +281,7 @@
     "control": "控制",
     "experts": "专家",
     "tasks": "自动化",
+    "tickets": "活",
     "connectors": "连接器",
     "bridge": "云端协同",
     "acp": "智能体协作",
@@ -8028,5 +8029,24 @@
     "nameRequired": "请先填写名称",
     "failed": "润色失败，请稍后重试",
     "emptyResult": "模型未返回结果"
+  },
+  "tickets": {
+    "subtitle": "长任务都在这里：谁在做、卡在哪、下一步是什么",
+    "refresh": "刷新",
+    "loadFailed": "工单加载失败",
+    "empty": "还没有活。在对话里让它做一件长任务，就会出现在这里。",
+    "filterAll": "全部",
+    "filterPerson": "等我处理",
+    "filterWorking": "进行中",
+    "latestReport": "最近进度",
+    "stage": {
+      "working/queued": "排队中",
+      "working": "进行中",
+      "idle": "空闲",
+      "person/answer": "等你回答",
+      "person/review": "等你验收",
+      "person/blocked": "卡住了",
+      "person/delivery": "投递失败"
+    }
   }
 }
