@@ -20,6 +20,7 @@ import {
   Shield,
   PanelsTopLeft,
   ListChecks,
+  Contact,
 } from "lucide-react";
 import type { OctopUser } from "../api/modules/auth";
 import { navAllowed, userCan } from "../utils/permissions";
@@ -166,6 +167,12 @@ export function buildNavSections(
     path: "/tickets",
     icon: <ListChecks size={iconSize} strokeWidth={iconStroke} />,
     labelKey: "nav.tickets",
+  });
+  topItems.push({
+    key: "relations",
+    path: "/relations",
+    icon: <Contact size={iconSize} strokeWidth={iconStroke} />,
+    labelKey: "nav.relations",
   });
   if (navAllowed(user, "experts")) {
     topItems.push({

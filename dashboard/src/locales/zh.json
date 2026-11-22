@@ -357,7 +357,8 @@
     "saveFailed": "没能保存导航布局",
     "dragToReorder": "拖动排序",
     "chatHistory": "会话列表",
-    "passkeys": "通行密钥"
+    "passkeys": "通行密钥",
+    "relations": "关系"
   },
   "skillPackages": {
     "title": "技能包",
@@ -8048,5 +8049,12 @@
       "person/blocked": "卡住了",
       "person/delivery": "投递失败"
     }
+  },
+  "relations": {
+    "subtitle": "管家记得的人：谁是谁、什么关系",
+    "refresh": "刷新",
+    "loadFailed": "关系簿加载失败",
+    "empty": "还没有记录。在对话里提到「张总是我老板」这类信息，它就会记下来。",
+    "searchPlaceholder": "按人名或关系搜索"
   }
 }

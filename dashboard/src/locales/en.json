@@ -357,7 +357,8 @@
     "saveFailed": "Could not save the navigation layout",
     "dragToReorder": "Drag to reorder",
     "chatHistory": "Session list",
-    "passkeys": "Passkeys"
+    "passkeys": "Passkeys",
+    "relations": "People"
   },
   "skillPackages": {
     "title": "Skill Packages",
@@ -8048,5 +8049,12 @@
       "person/blocked": "Blocked",
       "person/delivery": "Delivery failed"
     }
+  },
+  "relations": {
+    "subtitle": "Who your assistant remembers, and how they relate to you",
+    "refresh": "Refresh",
+    "loadFailed": "Failed to load relationships",
+    "empty": "Nothing yet. Mention things like 'Zhang is my boss' in chat and they will show up here.",
+    "searchPlaceholder": "Search by name or relationship"
   }
 }
