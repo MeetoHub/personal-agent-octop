@@ -2,6 +2,10 @@ package com.octop.mobile.core.system
 
 import android.Manifest
 import android.content.Context
+import android.location.LocationManager
+import android.os.Build
+import android.provider.MediaStore
+import android.provider.Settings
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -17,15 +21,28 @@ object PhoneTools {
     const val CONTACTS_SEARCH = "contacts.search"
     const val SMS_RECENT = "sms.recent"
     const val CALENDAR_TODAY = "calendar.today"
+    const val LOCATION_CURRENT = "location.current"
+    const val PHOTOS_RECENT = "photos.recent"
+    const val NOTIFICATIONS_RECENT = "notifications.recent"
 
     /** 本机已实现的能力。hello 时上报给 NAS，没实现的不报，NAS 侧会据此判断可用性。 */
-    val SUPPORTED: List<String> = listOf(CONTACTS_SEARCH, SMS_RECENT, CALENDAR_TODAY)
+    val SUPPORTED: List<String> = listOf(
+        CONTACTS_SEARCH,
+        SMS_RECENT,
+        CALENDAR_TODAY,
+        LOCATION_CURRENT,
+        PHOTOS_RECENT,
+        NOTIFICATIONS_RECENT,
+    )
 
     fun call(ctx: Context, tool: String, args: JSONObject): JSONObject = try {
         when (tool) {
             CONTACTS_SEARCH -> contacts(ctx, args)
             SMS_RECENT -> sms(ctx, args)
             CALENDAR_TODAY -> calendar(ctx, args)
+            LOCATION_CURRENT -> location(ctx)
+            PHOTOS_RECENT -> photos(ctx, args)
+            NOTIFICATIONS_RECENT -> notifications(ctx, args)
             else -> fail("unsupported")
         }
     } catch (e: Exception) {
@@ -83,6 +100,79 @@ object PhoneTools {
             )
         }
         return ok(JSONObject().put("events", arr))
+    }
+
+    private fun location(ctx: Context): JSONObject {
+        val fine = SystemBridge.has(ctx, Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarse = SystemBridge.has(ctx, Manifest.permission.ACCESS_COARSE_LOCATION)
+        if (!fine && !coarse) return fail("permission_denied")
+        val manager = ctx.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+            ?: return fail("unsupported")
+        // 只取系统缓存的最后位置：不主动发起定位，避免唤醒耗电，也不用等卫星
+        val last = runCatching {
+            manager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                ?: manager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+                ?: manager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
+        }.getOrNull() ?: return fail("no_last_location")
+        return ok(
+            JSONObject()
+                .put("lat", last.latitude)
+                .put("lon", last.longitude)
+                .put("accuracy", last.accuracy.toDouble())
+                .put("at", last.time)
+        )
+    }
+
+    private fun photos(ctx: Context, args: JSONObject): JSONObject {
+        val permission = if (Build.VERSION.SDK_INT >= 33) {
+            Manifest.permission.READ_MEDIA_IMAGES
+        } else {
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        }
+        if (!SystemBridge.has(ctx, permission)) return fail("permission_denied")
+        val limit = args.optInt("limit", 20).coerceIn(1, 50)
+        val projection = arrayOf(
+            MediaStore.Images.Media._ID,
+            MediaStore.Images.Media.DISPLAY_NAME,
+            MediaStore.Images.Media.DATE_TAKEN,
+            MediaStore.Images.Media.SIZE,
+        )
+        val arr = JSONArray()
+        ctx.contentResolver.query(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            projection,
+            null,
+            null,
+            "${MediaStore.Images.Media.DATE_TAKEN} DESC",
+        )?.use { cursor ->
+            while (cursor.moveToNext() && arr.length() < limit) {
+                arr.put(
+                    JSONObject()
+                        .put("id", cursor.getLong(0))
+                        .put("name", cursor.getString(1) ?: "")
+                        .put("takenAt", cursor.getLong(2))
+                        .put("size", cursor.getLong(3))
+                )
+            }
+        }
+        return ok(JSONObject().put("photos", arr))
+    }
+
+    private fun notifications(ctx: Context, args: JSONObject): JSONObject {
+        if (!notificationAccessEnabled(ctx)) return fail("permission_denied")
+        val limit = args.optInt("limit", 20).coerceIn(1, 50)
+        val arr = JSONArray()
+        NotificationLog.recent(limit).forEach { arr.put(it) }
+        return ok(JSONObject().put("notifications", arr))
+    }
+
+    /** 通知使用权不是运行时权限，只能查系统里的已授权列表。 */
+    private fun notificationAccessEnabled(ctx: Context): Boolean {
+        val enabled = Settings.Secure.getString(
+            ctx.contentResolver,
+            "enabled_notification_listeners",
+        ) ?: return false
+        return enabled.split(':').any { it.contains(ctx.packageName) }
     }
 
     private fun ok(data: JSONObject): JSONObject = JSONObject().put("ok", true).put("data", data)

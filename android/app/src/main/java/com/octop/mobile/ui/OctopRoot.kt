@@ -87,7 +87,7 @@ private const val KEYBOARD_GAP_THRESHOLD_PX = 80
 
 private enum class Tab(val route: String, val label: String, val glyph: Glyph) {
     CHAT("threads", "对话", Glyph.CHAT),
-    EXPERTS("experts", "专家", Glyph.PERSON),
+    EXPERTS("experts", "团队", Glyph.PERSON),
     MEMORY("memory", "记忆", Glyph.STAR),
     SCHEDULE("schedule", "定时", Glyph.CLOCK),
     SETTINGS("settings", "我的", Glyph.MENU)

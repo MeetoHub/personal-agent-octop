@@ -36,6 +36,9 @@ import androidx.compose.ui.unit.sp
 import com.octop.mobile.core.auth.TokenStore
 import com.octop.mobile.core.sync.LinkState
 import com.octop.mobile.core.system.BridgeManager
+import com.octop.mobile.core.system.PhoneLink
+import com.octop.mobile.core.system.PhoneLinkState
+import com.octop.mobile.core.system.PhoneTools
 import com.octop.mobile.core.system.SystemBridge
 import com.octop.mobile.ui.AppViewModel
 import com.octop.mobile.ui.components.HubGlyph
@@ -233,36 +236,36 @@ fun SettingsScreen(vm: AppViewModel, onOpen: (String) -> Unit) {
             }
         }
 
-        item { SectionHeader("局域网桥", "让 agent 直接调手机，需同一 WiFi") }
+        item { SectionHeader("反向通道", "手机主动连 NAS，不在同一网络也能用") }
         item {
-            val running = BridgeManager.isRunning
+            val linkState by PhoneLink.state.collectAsState()
+            val online = linkState == PhoneLinkState.ONLINE
             OctopCard {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    StatusDot(if (running) Green else TextTertiary, size = 7)
+                    StatusDot(if (online) Green else TextTertiary, size = 7)
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = if (running) "运行中" else "已停止",
+                        text = when (linkState) {
+                            PhoneLinkState.ONLINE -> "已连接"
+                            PhoneLinkState.CONNECTING -> "连接中…"
+                            PhoneLinkState.OFFLINE -> "重连中…"
+                            PhoneLinkState.IDLE -> "未启动"
+                        },
                         fontSize = 14.sp,
-                        color = if (running) Green else TextSecondary
+                        color = if (online) Green else TextSecondary
                     )
                     Spacer(Modifier.weight(1f))
-                    PillButton(text = if (running) "关闭" else "开启", filled = !running) {
-                        if (running) BridgeManager.stop() else BridgeManager.start(ctx)
+                    PillButton(text = if (online) "断开" else "连接", filled = !online) {
+                        if (online) PhoneLink.stop() else PhoneLink.restart()
                         tick++
                     }
                 }
                 Spacer(Modifier.height(10.dp))
                 Text(
-                    text = BridgeManager.localUrl(),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = TextPrimary
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = "令牌 ${TokenStore.bridgeToken().take(10)}…",
-                    fontSize = 11.sp,
-                    color = TextTertiary
+                    text = "能力：" + PhoneTools.SUPPORTED.joinToString("、"),
+                    fontSize = 12.sp,
+                    lineHeight = 18.sp,
+                    color = TextSecondary
                 )
             }
         }
