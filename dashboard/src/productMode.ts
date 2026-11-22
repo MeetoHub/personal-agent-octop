@@ -9,3 +9,6 @@
  */
 export const ALLOW_MANUAL_AGENT_CREATION = false;
 export const SHOW_EXPERT_MARKET = false;
+
+/** 网页端只查看对话；真正的聊天在手机 App 上进行。 */
+export const WEB_CHAT_READONLY = true;

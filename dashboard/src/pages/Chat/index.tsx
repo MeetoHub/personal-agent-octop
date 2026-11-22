@@ -64,6 +64,7 @@ import type { TokenUsage } from "../../api/types";
 import type { ChatAttachment } from "./hooks/useChat";
 import MessageList from "./components/MessageList";
 import ChatInput, { type ChatInputHandle } from "./components/ChatInput";
+import { WEB_CHAT_READONLY } from "../../productMode";
 import WelcomeScreen from "./components/WelcomeScreen";
 import AgentNotReadyScreen from "./components/AgentNotReadyScreen";
 import ModelConfigEmpty from "./components/ModelConfigEmpty";
@@ -1967,6 +1968,7 @@ function ChatPageInner() {
                 </div>
               </div>
             ) : null}
+            {!WEB_CHAT_READONLY ? (
             <ChatInput
               ref={chatInputRef}
               onSend={wrappedHandleSend}
@@ -2037,6 +2039,22 @@ function ChatPageInner() {
               contextMaxTokens={contextMaxTokens}
               decisionSaved={decisionSaved}
             />
+            ) : (
+              <div
+                style={{
+                  margin: "12px 16px 16px",
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  background: "var(--fn-bg-tertiary, #f4f4f5)",
+                  color: "var(--fn-text-tertiary, #8a8f98)",
+                  fontSize: 12,
+                  lineHeight: "18px",
+                  textAlign: "center",
+                }}
+              >
+                对话请用手机 App 进行。这里是历史与配置的查看端。
+              </div>
+            )}
           </div>
 
           <ChatDockPanels
