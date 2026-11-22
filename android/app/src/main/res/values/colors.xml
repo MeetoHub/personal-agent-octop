@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- 本体 rose 明色品牌色，取自 dashboard src styles theme vars -->
-    <color name="octop_accent">#E85D75</color>
-    <!-- 本体 rose 明色页面底色，仅作 windowBackground 过渡 -->
-    <color name="octop_bg">#F5F6F8</color>
-    <!-- favico 红底渐变中段色，配白色 mark -->
-    <color name="ic_launcher_background">#F44040</color>
-</resources>
