@@ -211,6 +211,15 @@ function ChatPageInner() {
     () => agents.find((a) => a.agent_id === resolvedAgentId) ?? null,
     [agents, resolvedAgentId],
   );
+  // 主智能体：打开 /chat（没指定专家）时直接进它，不再先让用户选人。
+  useEffect(() => {
+    if (routeAgentId || agents.length === 0) return;
+    const primary = agents.find((a) => a.is_primary);
+    if (primary && primary.agent_id !== activeAgentId) {
+      setActiveAgent(primary.agent_id);
+      navigate(`/chat/${primary.agent_id}`, { replace: true });
+    }
+  }, [routeAgentId, agents, activeAgentId, navigate, setActiveAgent]);
   const agentChatReady = isAgentChatReady(activeAgent?.state, activeAgent);
   const trajectoryEnabled =
     activeAgent !== null && activeAgent.config?.enable_trajectory !== false;

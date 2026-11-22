@@ -212,6 +212,8 @@ def _row_dict(
         "agent_id": row.agent_id,
         "user_id": row.user_id,
         "name": row.name,
+        # 主智能体标记：前端据此把 /chat 直接导到它，不再先让用户选人
+        "is_primary": bool(cfg.get("is_primary")),
         "description": row.description,
         "persona_mbti": row.persona_mbti,
         "default_model": row.default_model,

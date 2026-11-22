@@ -5,6 +5,7 @@
 # 这里指向 baseline-b6/ 里那份「b6 + P6 补丁」的产物（SHA 46ce4c43…，与生产一致）。
 # NAS 升级到 b7 之后，删掉第三列，直接部署 src/octop/infra/agents/manager.py。
 api/app.py|700
+api/routers/agents.py|644
 api/routers/tickets.py|644
 api/routers/phone.py|644
 api/routers/chat/turn.py|644|deploy/nas/baseline-b6/turn.py
