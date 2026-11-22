@@ -44,15 +44,15 @@ def _tool_ctx() -> dict[str, Any]:
 
 
 def _require_phone_access(config: OctopConfig, ctx: dict[str, Any], user_repo: Any) -> None:
-    if not config.capabilities.mobile.enabled:
-        raise ValueError("Phone channel is not enabled on this host")
+    if not config.capabilities.phone.enabled:
+        raise ValueError("个人手机通道未开启（capabilities.phone.enabled=false）")
     user_raw = ctx.get("user")
     if user_raw is None:
         raise ValueError("missing configurable.user")
     if ctx.get("user_is_admin"):
         return
     row = user_repo.get(int(user_raw))
-    if row is None or not user_has_permission(row, "mobile"):
+    if row is None or not user_has_permission(row, "phone"):
         raise ValueError("mobile permission required")
 
 
@@ -84,7 +84,7 @@ def build_phone_tools(
     user_repo: Any,
 ) -> list[StructuredTool]:
     """Return the read-only phone tools (always registered; calls fail fast when no phone is online)."""
-    if not config.capabilities.mobile.enabled:
+    if not config.capabilities.phone.enabled:
         return []
 
     async def phone_contacts_search(

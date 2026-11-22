@@ -4549,6 +4549,64 @@ class AgentManager:
 
             phone_tools = build_phone_tools(self._config, user_repo=self._repos.user_repo)
 
+        # 工单工具：建单 / 看单 / 报进度。Router 预设的白名单里就有它们。
+        ticket_tools: list[Any] = []
+        if not team_host:
+            from octop.infra.tickets.store import TicketStore  # noqa: PLC0415
+            from octop.infra.tickets.tools import build_ticket_tools  # noqa: PLC0415
+
+            ticket_tools = build_ticket_tools(
+                self._config,
+                store=TicketStore(self._repos.db),
+                agent_id=row.agent_id,
+            )
+
+        # 超级智能体：团队主持、根 agent（is_root）或主智能体才能"招人/装子智能体"
+        from octop.infra.agents.teams import is_team_agent  # noqa: PLC0415
+
+        can_manage_team = (
+            is_team_agent(row)
+            or bool(cfg.get("is_root"))
+            or bool(cfg.get("is_primary"))
+            or bool(cfg.get("is_system_router"))
+        )
+        admin_tools: list[Any] = []
+        subagent_tools: list[Any] = []
+        relation_tools: list[Any] = []
+        if can_manage_team:
+            from octop.infra.agents.agent_admin import (  # noqa: PLC0415
+                build_agent_admin_tools,
+            )
+            from octop.infra.agents.agent_subagents import (  # noqa: PLC0415
+                build_subagent_tools,
+            )
+
+            admin_tools = build_agent_admin_tools(
+                create_agent=self.create,
+                count_agents=lambda uid: self._repos.agent_repo.count_by_user(uid),
+                caller_agent_id=row.agent_id,
+            )
+
+            def _agent_workspace(aid: str) -> Any:
+                try:
+                    return self.get_agent(aid).agent.workspace
+                except Exception:  # noqa: BLE001 - 未运行就交给工具报错
+                    return None
+
+            subagent_tools = build_subagent_tools(
+                workspace_for=_agent_workspace,
+                reload_agent=self.reload,
+                caller_agent_id=row.agent_id,
+            )
+
+            from octop.infra.relations.store import RelationStore  # noqa: PLC0415
+            from octop.infra.relations.tools import build_relation_tools  # noqa: PLC0415
+
+            relation_tools = build_relation_tools(
+                store=RelationStore(self._repos.db),
+                agent_id=row.agent_id,
+            )
+
         from octop_harness.plugins import PluginRegistry, build_plugin_tools  # noqa: PLC0415
 
         from octop.infra.agents.plugins.plugin_tool_defaults import (  # noqa: PLC0415
@@ -4593,7 +4651,16 @@ class AgentManager:
             plugin_tools,
             reserved={
                 str(getattr(t, "name", ""))
-                for t in [*(cron_tools or []), *knowledge_tools, *mobile_tools, *phone_tools]
+                for t in [
+                    *(cron_tools or []),
+                    *knowledge_tools,
+                    *mobile_tools,
+                    *phone_tools,
+                    *ticket_tools,
+                    *admin_tools,
+                    *subagent_tools,
+                    *relation_tools,
+                ]
             },
         )
         self._plugin_tool_labels[row.agent_id] = {
@@ -4658,6 +4725,10 @@ class AgentManager:
         merged_tools.extend(knowledge_tools)
         merged_tools.extend(mobile_tools)
         merged_tools.extend(phone_tools)
+        merged_tools.extend(ticket_tools)
+        merged_tools.extend(admin_tools)
+        merged_tools.extend(subagent_tools)
+        merged_tools.extend(relation_tools)
         merged_tools.extend(plugin_tools)
         # agent_list / ask_agent: PeerAgentMiddleware (team_enabled=True), not config.tools.
 

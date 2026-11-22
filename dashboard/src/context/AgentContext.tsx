@@ -43,6 +43,8 @@ export interface OctopAgent extends AgentRuntimeApiFields {
   group_ids?: string[];
   /** Whether the current user owns this expert. */
   is_owner?: boolean;
+  /** 主智能体：`/chat` 没有指定专家时直接进它。 */
+  is_primary?: boolean;
   name: string;
   description: string | null;
   persona_mbti: string | null;

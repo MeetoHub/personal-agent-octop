@@ -19,6 +19,8 @@ import { showConfirmModal } from "../../utils/confirmModal";
 import PlanReadyCard from "./components/PlanReadyCard";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { useHitlEnabled } from "../../hooks/useHitlEnabled";
+import { getHomeAgent } from "../../api/modules/agent";
+import type { OctopAgent } from "../../context/AgentContext";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { navAllowed, userCan } from "../../utils/permissions";
 import { useChat } from "./hooks/useChat";
@@ -62,6 +64,7 @@ import type { TokenUsage } from "../../api/types";
 import type { ChatAttachment } from "./hooks/useChat";
 import MessageList from "./components/MessageList";
 import ChatInput, { type ChatInputHandle } from "./components/ChatInput";
+import { WEB_CHAT_READONLY } from "../../productMode";
 import WelcomeScreen from "./components/WelcomeScreen";
 import AgentNotReadyScreen from "./components/AgentNotReadyScreen";
 import ModelConfigEmpty from "./components/ModelConfigEmpty";
@@ -207,10 +210,32 @@ function ChatPageInner() {
   } = useAgent();
   const resolvedAgentId = routeAgentId || activeAgentId;
   const hitlEnabled = useHitlEnabled(resolvedAgentId);
-  const activeAgent = useMemo(
-    () => agents.find((a) => a.agent_id === resolvedAgentId) ?? null,
-    [agents, resolvedAgentId],
-  );
+  const [homeAgent, setHomeAgent] = useState<OctopAgent | null>(null);
+  const activeAgent = useMemo(() => {
+    const found = agents.find((a) => a.agent_id === resolvedAgentId);
+    if (found) return found;
+    // 调度层是系统内建的，不在专家列表里，单独持有它的记录
+    return homeAgent && homeAgent.agent_id === resolvedAgentId ? homeAgent : null;
+  }, [agents, resolvedAgentId, homeAgent]);
+  // 打开 /chat（没指定专家）→ 进平台内建的调度层，用户不选人。
+  useEffect(() => {
+    if (routeAgentId) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const home = (await getHomeAgent()) as unknown as OctopAgent;
+        if (cancelled || !home?.agent_id) return;
+        setHomeAgent(home);
+        setActiveAgent(home.agent_id);
+        navigate(`/chat/${home.agent_id}`, { replace: true });
+      } catch {
+        // 取不到就保持现状，不影响手动进入某个专家
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [routeAgentId, navigate, setActiveAgent]);
   const agentChatReady = isAgentChatReady(activeAgent?.state, activeAgent);
   const trajectoryEnabled =
     activeAgent !== null && activeAgent.config?.enable_trajectory !== false;
@@ -1943,6 +1968,7 @@ function ChatPageInner() {
                 </div>
               </div>
             ) : null}
+            {!WEB_CHAT_READONLY ? (
             <ChatInput
               ref={chatInputRef}
               onSend={wrappedHandleSend}
@@ -2013,6 +2039,22 @@ function ChatPageInner() {
               contextMaxTokens={contextMaxTokens}
               decisionSaved={decisionSaved}
             />
+            ) : (
+              <div
+                style={{
+                  margin: "12px 16px 16px",
+                  padding: "12px 14px",
+                  borderRadius: 12,
+                  background: "var(--fn-bg-tertiary, #f4f4f5)",
+                  color: "var(--fn-text-tertiary, #8a8f98)",
+                  fontSize: 12,
+                  lineHeight: "18px",
+                  textAlign: "center",
+                }}
+              >
+                对话请用手机 App 进行。这里是历史与配置的查看端。
+              </div>
+            )}
           </div>
 
           <ChatDockPanels

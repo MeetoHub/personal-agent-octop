@@ -281,6 +281,7 @@
     "control": "Control",
     "experts": "Experts",
     "tasks": "Automation",
+    "tickets": "Work",
     "connectors": "Connectors",
     "bridge": "Cloud collab",
     "acp": "Agent collaboration",
@@ -356,7 +357,8 @@
     "saveFailed": "Could not save the navigation layout",
     "dragToReorder": "Drag to reorder",
     "chatHistory": "Session list",
-    "passkeys": "Passkeys"
+    "passkeys": "Passkeys",
+    "relations": "People"
   },
   "skillPackages": {
     "title": "Skill Packages",
@@ -572,7 +574,7 @@
     "editDocumentSuccess": "Saved; reindex started",
     "editDocumentFailed": "Failed to save document",
     "filenameRequired": "Please enter a file name",
-    "filenamePlaceholder": "e.g. notes",
+    "filenamePlaceholder": "File name",
     "fileFormat": "Format",
     "fileContent": "Content",
     "fileContentPlaceholder": "Write document content here…",
@@ -593,7 +595,6 @@
     "moveSuccess": "Moved",
     "moveSuccessTo": "Moved to “{{name}}”",
     "moveFailed": "Failed to move",
-    "filenamePlaceholder": "File name",
     "pathBreadcrumb": "Path",
     "deleteFolderConfirm": "Delete this folder and everything inside it?",
     "uploaded": "Documents uploaded",
@@ -1363,7 +1364,8 @@
       "yolo": "YOLO",
       "yoloHint": "New chats skip approval. The underlying agent runs actions directly, including file edits and commands. A chat can still switch back to asking every time.",
       "sessionModeHint": "Modes come from the managed agent. New chats start here, and a chat can still switch."
-    }
+    },
+    "createdByRoot": "Created by the root agent"
   },
   "subagents": {
     "catalogTitle": "Manage subagents",
@@ -8028,5 +8030,31 @@
     "nameRequired": "Enter a name first",
     "failed": "Polish failed. Please try again later.",
     "emptyResult": "The model returned an empty result"
+  },
+  "tickets": {
+    "subtitle": "Long-running work in one place: who is on it, what is blocking it, what happens next",
+    "refresh": "Refresh",
+    "loadFailed": "Failed to load tickets",
+    "empty": "No work yet. Ask the assistant for a long-running task and it will show up here.",
+    "filterAll": "All",
+    "filterPerson": "Waiting on me",
+    "filterWorking": "In progress",
+    "latestReport": "Latest update",
+    "stage": {
+      "working/queued": "Queued",
+      "working": "In progress",
+      "idle": "Idle",
+      "person/answer": "Awaiting answer",
+      "person/review": "Awaiting review",
+      "person/blocked": "Blocked",
+      "person/delivery": "Delivery failed"
+    }
+  },
+  "relations": {
+    "subtitle": "Who your assistant remembers, and how they relate to you",
+    "refresh": "Refresh",
+    "loadFailed": "Failed to load relationships",
+    "empty": "Nothing yet. Mention things like 'Zhang is my boss' in chat and they will show up here.",
+    "searchPlaceholder": "Search by name or relationship"
   }
 }

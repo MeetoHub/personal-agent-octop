@@ -148,6 +148,7 @@ PERMISSIONS: dict[str, PermissionDef] = {
     "cloud": _p("cloud", "control", "工作台/云服务器", "Workbench / Cloud"),
     "desktop": _p("desktop", "control", "远程桌面", "Remote Desktop"),
     "mobile": _p("mobile", "control", "远程手机", "Remote Phone"),
+    "phone": _p("phone", "control", "我的手机", "Personal Phone"),
     # --- admin: grouped by page, chip = tab title ---
     "users": _p(
         "users",
