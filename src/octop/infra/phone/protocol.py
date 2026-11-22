@@ -32,9 +32,9 @@ CLOSE_SERVER_ERROR = 1011
 DEFAULT_TIMEOUT_S = 10.0
 SLOW_TIMEOUT_S = 20.0
 
-# Permission key reused from the adb remote-phone feature: same "control the
-# user's own phone" surface, and it already exists in the permission catalog.
-PERMISSION_KEY = "mobile"
+# 个人手机反向通道自己的权限键。不要复用 "mobile"——那是 Remote Android
+# （NAS 用 ADB 连同一网络内的云手机）的权限，两个场景要分开授权。
+PERMISSION_KEY = "phone"
 
 # Wire tool ids the phone must implement. Read-only batch.
 TOOL_CONTACTS_SEARCH = "contacts.search"

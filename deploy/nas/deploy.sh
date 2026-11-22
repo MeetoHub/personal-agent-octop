@@ -44,6 +44,8 @@ rsh "test -d '$REMOTE_ROOT'" || { echo "远端目录不存在：$REMOTE_ROOT" >&
 # 收集文件清单
 PATHS=(); MODES=(); SRCS=()
 while IFS='|' read -r p m s; do
+  # 去掉 CRLF 残留，否则 install 会拿到 "644"
+  p="${p%$''}"; m="${m%$''}"; s="${s%$''}"
   case "$p" in ''|'#'*) continue ;; esac
   PATHS+=("$p"); MODES+=("${m:-644}"); SRCS+=("${s:-src/octop/$p}")
 done < "$FILES_LIST"

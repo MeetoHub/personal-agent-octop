@@ -119,8 +119,20 @@ class MobileCapabilities:
 
 
 @dataclass(frozen=True)
+class PhoneCapabilities:
+    """个人手机反向通道（手机主动连 NAS，装在自己手机上）。
+
+    和 ``capabilities.mobile``（Remote Android：NAS 用 ADB 连同一网络内的手机，
+    当云手机用）是**两件不同的事**，开关也分开。
+    """
+
+    enabled: bool = True
+
+
+@dataclass(frozen=True)
 class CapabilitiesConfig:
     mobile: MobileCapabilities = field(default_factory=MobileCapabilities)
+    phone: PhoneCapabilities = field(default_factory=PhoneCapabilities)
 
 
 @dataclass(frozen=True)
@@ -201,13 +213,25 @@ def _parse_mobile_capabilities(raw: object) -> MobileCapabilities:
     )
 
 
+def _parse_phone_capabilities(raw: object) -> PhoneCapabilities:
+    if raw is None:
+        return PhoneCapabilities()
+    if not isinstance(raw, dict):
+        raise ValueError("config.capabilities.phone must be an object")
+    return PhoneCapabilities(enabled=bool(raw.get("enabled", True)))
+
+
 def _parse_capabilities_section(raw: object) -> CapabilitiesConfig:
     if raw is None:
         return CapabilitiesConfig()
     if not isinstance(raw, dict):
         raise ValueError("config.capabilities must be an object")
     mobile_raw = raw.get("mobile")
-    return CapabilitiesConfig(mobile=_parse_mobile_capabilities(mobile_raw))
+    phone_raw = raw.get("phone")
+    return CapabilitiesConfig(
+        mobile=_parse_mobile_capabilities(mobile_raw),
+        phone=_parse_phone_capabilities(phone_raw),
+    )
 
 
 def _parse_backup_section(raw: object) -> BackupConfig:

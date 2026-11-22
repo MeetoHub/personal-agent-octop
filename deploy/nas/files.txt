@@ -4,6 +4,8 @@
 # manager.py 例外：生产是 v1.0.3b6，仓库是 b7，两个版本的上游内容不同。
 # 这里指向 baseline-b6/ 里那份「b6 + P6 补丁」的产物（SHA 46ce4c43…，与生产一致）。
 # NAS 升级到 b7 之后，删掉第三列，直接部署 src/octop/infra/agents/manager.py。
+config.py|644
+infra/users/permissions.py|644
 api/app.py|700
 api/routers/agents.py|644
 api/routers/tickets.py|644
