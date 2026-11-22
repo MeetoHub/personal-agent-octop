@@ -19,6 +19,8 @@ import { showConfirmModal } from "../../utils/confirmModal";
 import PlanReadyCard from "./components/PlanReadyCard";
 import { useIsMobile } from "../../hooks/useIsMobile";
 import { useHitlEnabled } from "../../hooks/useHitlEnabled";
+import { getHomeAgent } from "../../api/modules/agent";
+import type { OctopAgent } from "../../context/AgentContext";
 import { useCurrentUser } from "../../hooks/useCurrentUser";
 import { navAllowed, userCan } from "../../utils/permissions";
 import { useChat } from "./hooks/useChat";
@@ -207,19 +209,32 @@ function ChatPageInner() {
   } = useAgent();
   const resolvedAgentId = routeAgentId || activeAgentId;
   const hitlEnabled = useHitlEnabled(resolvedAgentId);
-  const activeAgent = useMemo(
-    () => agents.find((a) => a.agent_id === resolvedAgentId) ?? null,
-    [agents, resolvedAgentId],
-  );
-  // 主智能体：打开 /chat（没指定专家）时直接进它，不再先让用户选人。
+  const [homeAgent, setHomeAgent] = useState<OctopAgent | null>(null);
+  const activeAgent = useMemo(() => {
+    const found = agents.find((a) => a.agent_id === resolvedAgentId);
+    if (found) return found;
+    // 调度层是系统内建的，不在专家列表里，单独持有它的记录
+    return homeAgent && homeAgent.agent_id === resolvedAgentId ? homeAgent : null;
+  }, [agents, resolvedAgentId, homeAgent]);
+  // 打开 /chat（没指定专家）→ 进平台内建的调度层，用户不选人。
   useEffect(() => {
-    if (routeAgentId || agents.length === 0) return;
-    const primary = agents.find((a) => a.is_primary);
-    if (primary && primary.agent_id !== activeAgentId) {
-      setActiveAgent(primary.agent_id);
-      navigate(`/chat/${primary.agent_id}`, { replace: true });
-    }
-  }, [routeAgentId, agents, activeAgentId, navigate, setActiveAgent]);
+    if (routeAgentId) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const home = (await getHomeAgent()) as unknown as OctopAgent;
+        if (cancelled || !home?.agent_id) return;
+        setHomeAgent(home);
+        setActiveAgent(home.agent_id);
+        navigate(`/chat/${home.agent_id}`, { replace: true });
+      } catch {
+        // 取不到就保持现状，不影响手动进入某个专家
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [routeAgentId, navigate, setActiveAgent]);
   const agentChatReady = isAgentChatReady(activeAgent?.state, activeAgent);
   const trajectoryEnabled =
     activeAgent !== null && activeAgent.config?.enable_trajectory !== false;

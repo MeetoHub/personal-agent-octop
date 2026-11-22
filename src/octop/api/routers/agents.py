@@ -263,6 +263,15 @@ def _row_dict(
     return payload
 
 
+def _is_hidden_agent(row: Any) -> bool:
+    """系统内建 agent（调度层）不进列表：用户不该看到、也不该配置它。"""
+    try:
+        cfg = json.loads(getattr(row, "config_json", "") or "{}")
+    except (TypeError, ValueError):
+        return False
+    return isinstance(cfg, dict) and bool(cfg.get("hidden"))
+
+
 @router.get("", summary="List agents")
 async def list_agents(
     user: Any = Depends(current_user),
@@ -294,6 +303,7 @@ async def list_agents(
     registry = server.app_runtime.agent_registry
     if scope == "all":
         rows = registry.list_rows()
+        rows = [r for r in rows if not _is_hidden_agent(r)]
         user_ids = {r.user_id for r in rows if r.user_id is not None}
         username_by_id: dict[int, str] = {}
         for uid in user_ids:
@@ -318,6 +328,7 @@ async def list_agents(
         viewer_user_id=None if user.is_admin else user.id,
     )
     rows = list({row.agent_id: row for row in [*shared, *owned]}.values())
+    rows = [r for r in rows if not _is_hidden_agent(r)]
     shared_owner_username_by_id: dict[int, str] = {}
     for row in shared:
         if row.user_id is None or row.user_id in shared_owner_username_by_id:
@@ -427,6 +438,24 @@ async def mark_agent_read(
         raise OctopError(ErrorCode.AGENT_NOT_FOUND, f"agent {agent_id!r} not found")
     assert_agent_access_row(row, user, repos=server.services.repos)
     server.services.session_repo.clear_unread_for_agent(agent_id, user.id)
+
+
+@router.get("/home", summary="Home entry (system router)")
+async def home_agent(
+    user: Any = Depends(current_user),
+    server: Any = Depends(get_server),
+) -> dict[str, Any]:
+    """用户打开对话时的默认入口：平台内建的调度层，不是用户配置的专家。"""
+    from octop.infra.agents.router_agent import ensure_router_agent  # noqa: PLC0415
+
+    assert server.app_runtime is not None
+    row = await ensure_router_agent(server.app_runtime.agent_registry, user.id)
+    return _row_dict(
+        row,
+        viewer_user_id=user.id,
+        owner_username=user.username,
+        server=server,
+    )
 
 
 @router.get("/{agent_id}", summary="Get agent")

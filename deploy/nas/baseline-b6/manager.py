@@ -4505,7 +4505,11 @@ class AgentManager:
         from octop.infra.agents.teams import is_team_agent  # noqa: PLC0415
 
         admin_tools: list[Any] = []
-        if is_team_agent(row) or bool(cfg.get("is_primary")):
+        if (
+            is_team_agent(row)
+            or bool(cfg.get("is_primary"))
+            or bool(cfg.get("is_system_router"))
+        ):
             from octop.infra.agents.agent_admin import (  # noqa: PLC0415
                 build_agent_admin_tools,
             )
