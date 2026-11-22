@@ -14,11 +14,16 @@ from __future__ import annotations
 
 import json
 import logging
+import os
 from typing import Any
 
 logger = logging.getLogger(__name__)
 
 ROUTER_AGENT_NAME = "Octop"
+
+# 想让判断层用更小/更快的模型（例如本地 Ollama），设这个环境变量即可；
+# 留空就用用户的默认模型。路由是短判断，小模型通常够用且更省钱。
+ROUTER_MODEL_ENV = "OCTOP_ROUTER_MODEL"
 
 ROUTER_SYSTEM_PROMPT = """你是 Octop 的调度层，用户看不到你，也不应该察觉到你存在。
 
@@ -67,6 +72,7 @@ async def ensure_router_agent(manager: Any, user_id: int) -> Any:
         user_id=int(user_id),
         description="",
         system_prompt=ROUTER_SYSTEM_PROMPT,
+        default_model=(os.environ.get(ROUTER_MODEL_ENV) or "").strip() or None,
         config={
             "is_system_router": True,
             "hidden": True,
