@@ -10,7 +10,9 @@ DSH 的 Router 分三档，这里是第①档里唯一会写数据的动作：
 
 from __future__ import annotations
 
+import json
 import logging
+from typing import Any
 
 from octop.infra.tickets.stage import is_long_task
 from octop.infra.tickets.store import Ticket, TicketStore
@@ -40,8 +42,13 @@ def open_ticket_for_turn(
     agent_id: str,
     thread_id: str | None,
     text: str,
+    assignee_id: str | None = None,
 ) -> Ticket | None:
-    """Best-effort：任何异常都吞掉，绝不让建单失败影响对话本身。"""
+    """Best-effort：任何异常都吞掉，绝不让建单失败影响对话本身。
+
+    ``assignee_id`` 有值就顺手派给队员（assignment_kind=expert），这样「活」页
+    一出现就是"已有人在做"，而不是一张没人认领的单。
+    """
     if not should_auto_open(text):
         return None
     try:
@@ -49,7 +56,7 @@ def open_ticket_for_turn(
             rows = store.list_for_owner(owner_user_id, agent_id=agent_id, limit=50)
             if any(row.thread_id == thread_id and row.ended_at is None for row in rows):
                 return None
-        return store.create(
+        ticket = store.create(
             owner_user_id=owner_user_id,
             agent_id=agent_id,
             thread_id=thread_id,
@@ -57,6 +64,42 @@ def open_ticket_for_turn(
             goal=text.strip()[:MAX_GOAL],
             actor="router",
         )
+        if assignee_id:
+            ticket = store.assign(
+                ticket.ticket_id,
+                owner_user_id=owner_user_id,
+                assignment_kind="expert",
+                assignee_id=assignee_id,
+                actor="router",
+            )
+        return ticket
     except Exception:  # noqa: BLE001 - 规则层不该让对话失败
         logger.exception("auto-open ticket failed agent=%s thread=%s", agent_id, thread_id)
         return None
+
+
+def pick_worker(
+    server: Any,
+    *,
+    agent_id: str,
+    user_id: int,
+    cfg: dict[str, Any] | None = None,
+) -> str | None:
+    """给工单挑一个执行者：先看专家配置，再找"这个主智能体招的第一个队员"。"""
+    explicit = (cfg or {}).get("default_worker_agent_id")
+    if isinstance(explicit, str) and explicit.strip():
+        return explicit.strip()
+    try:
+        rows = server.services.repos.agent_repo.list_by_user(int(user_id))
+    except Exception:  # noqa: BLE001
+        return None
+    for row in rows:
+        if str(getattr(row, "agent_id", "")) == agent_id:
+            continue
+        try:
+            row_cfg = json.loads(getattr(row, "config_json", "") or "{}")
+        except (TypeError, ValueError):
+            continue
+        if isinstance(row_cfg, dict) and row_cfg.get("created_by_agent_id") == agent_id:
+            return str(row.agent_id)
+    return None

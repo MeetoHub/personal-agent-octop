@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -112,6 +113,16 @@ def client_message_id_from_turn(turn: ChatTurnBody) -> str | None:
             return raw.strip()
         return None
     return None
+
+
+def _agent_cfg(row: Any) -> dict[str, Any]:
+    """专家 config_json → dict；坏数据当空配置，不让它影响对话。"""
+    raw = getattr(row, "config_json", "") or "{}"
+    try:
+        data = json.loads(raw)
+    except (TypeError, ValueError):
+        return {}
+    return data if isinstance(data, dict) else {}
 
 
 def _turn_plain_text(turn: ChatTurnBody) -> str:
@@ -304,7 +315,10 @@ async def prepare_dashboard_turn(
     )
     # 规则层：明显是长任务的，先落一张工单，用户在「活」页能立刻看到。
     # 放在这里是因为 thread_id 刚解析出来；建单失败不影响对话（内部已吞异常）。
-    from octop.infra.tickets.auto_open import open_ticket_for_turn  # noqa: PLC0415
+    from octop.infra.tickets.auto_open import (  # noqa: PLC0415
+        open_ticket_for_turn,
+        pick_worker,
+    )
     from octop.infra.tickets.store import TicketStore  # noqa: PLC0415
 
     open_ticket_for_turn(
@@ -313,6 +327,12 @@ async def prepare_dashboard_turn(
         agent_id=agent_id,
         thread_id=thread_id,
         text=_turn_plain_text(turn),
+        assignee_id=pick_worker(
+            server,
+            agent_id=agent_id,
+            user_id=int(user.id),
+            cfg=_agent_cfg(row),
+        ),
     )
     model_ref = (turn.default_model or "").strip() or None
     if (
